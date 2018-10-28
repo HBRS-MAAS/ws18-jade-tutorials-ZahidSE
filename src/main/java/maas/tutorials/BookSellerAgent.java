@@ -50,14 +50,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BookSellerAgent extends Agent {
 	// The catalogue of books for sale (maps the title of a book to its details)
-	private Hashtable<String, Book> catalogue = null;
+	private Hashtable<String, Book> catalogue = new Hashtable<String, Book>();
 
 
 	// Put agent initializations here
 	protected void setup() {
 		initializeCatalog();
 		
-		if(catalogue != null) {
+		if(catalogue.size() > 0) {
 			System.out.println(String.format("########## %s is not a valid seller id ##########", getLocalName()));
 			
 			// Register the book-selling service in the yellow pages
@@ -84,8 +84,18 @@ public class BookSellerAgent extends Agent {
 		
 	}
 	
+	/**
+    This is invoked by the GUI when the user adds a new book for sale
+	 */
+	public void updateCatalogue(Book book) {
+		catalogue.put(book.getTitle(), book);
+	}
+	
+	/**
+	 * Read catalog based on agent local name
+	 */
 	private void initializeCatalog() {
-		String catalogFilePath = String.format("/%s.json", getLocalName());
+		String catalogFilePath = String.format("catalog/%s.json", getLocalName());
 		InputStream catalogInputStream = this.getClass().getResourceAsStream(catalogFilePath);
 		if ( catalogInputStream != null ) {
 			ObjectMapper mapper = new ObjectMapper();	
@@ -103,7 +113,7 @@ public class BookSellerAgent extends Agent {
 
 	// Put agent clean-up operations here
 	protected void takeDown() {
-		if(catalogue != null) {
+		if(catalogue.size() > 0) {
 			// Deregister from the yellow pages
 			try {
 				DFService.deregister(this);
@@ -115,13 +125,6 @@ public class BookSellerAgent extends Agent {
 
 		// Printout a dismissal message
 		System.out.println("Seller-agent "+getAID().getName()+" terminating.");
-	}
-
-	/**
-     This is invoked by the GUI when the user adds a new book for sale
-	 */
-	public void updateCatalogue(Book book) {
-		catalogue.put(book.getTitle(), book);
 	}
 	
 	/**
