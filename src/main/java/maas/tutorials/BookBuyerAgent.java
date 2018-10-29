@@ -184,11 +184,11 @@ public class BookBuyerAgent extends Agent {
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						// Purchase successful. We can terminate
 						
-						System.out.println(String.format("### %s successfully purchased %s from %s for $ %.2f ###",
+						System.out.println(String.format("### %s successfully purchased \"%s\" from %s for $ %.2f ###",
 								myAgent.getLocalName(), targetBookTitle, reply.getSender().getLocalName(), bestPrice));
 					}
 					else {
-						System.out.println(String.format("!!! Attempt failed: requested book, %s by %s is already sold. !!!",
+						System.out.println(String.format("!!! Attempt failed: requested book, \"%s\" by %s is already sold. !!!",
 								targetBookTitle, myAgent.getLocalName()));
 					}
 
@@ -203,7 +203,7 @@ public class BookBuyerAgent extends Agent {
 
 		public boolean done() {
 			if (step == 2 && bestSeller == null) {
-				System.out.println(String.format("!!! Attempt failed: requested book, %s by %s is not avilable. !!!",
+				System.out.println(String.format("!!! Attempt failed: requested book, \"%s\" by %s is not avilable. !!!",
 						targetBookTitle, myAgent.getLocalName()));
 			}
 			
