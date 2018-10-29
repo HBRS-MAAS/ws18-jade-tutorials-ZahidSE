@@ -1,0 +1,26 @@
+[
+	{
+		"title":"In Search of Lost Time",
+		"quantity":8,
+		"price":18.0,
+		"type":"HardCopy"
+	},
+	{
+		"title":"Moby Dick",
+		"quantity":12,
+		"price":30.0,
+		"type":"HardCopy"
+	},
+	{
+		"title":"Ulysses",
+		"quantity":-1,
+		"price":15.0,
+		"type":"SoftCopy"
+	},
+	{
+		"title":"Hamlet",
+		"quantity":-1,
+		"price":14.0,
+		"type":"SoftCopy"
+	}
+]

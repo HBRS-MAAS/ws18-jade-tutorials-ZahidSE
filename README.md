@@ -2,7 +2,13 @@
 
 # Jade Tutorials
 
-Make sure to keep this README updated, particularly on how to run your project from the **command line**.
+## Agents
+
+### Seller
+There are 3 seller agents. Each of these agents loads it's catalog from separate `json` files provided in `resources/catalog`.
+
+### Buyer
+The number of buyer agents depends on the input file `purchase_list.txt` which is also included in `resources`. Each line of the input file contains titles of 3 books and a buyer agent is created for each line. The buyer agent is responsible of buying 3 books listed in the corresponding line. The number of lines in `purchase_list.txt` and titles in each line are not fixed. Adding more lines will start more buyers and the buyers are able to handle purchase of any number books passed in argument.  
 
 
 ## Dependencies
