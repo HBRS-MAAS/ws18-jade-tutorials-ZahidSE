@@ -75,7 +75,7 @@ public class BookBuyerAgent extends Agent {
 						template.addServices(sd);
 						try {
 							DFAgentDescription[] result = DFService.search(myAgent, template); 
-							// System.out.println("Found the following seller agents:");
+							// System.out.println("Total sellers found: " + result.length);
 							sellerAgents = new AID[result.length];
 							for (int i = 0; i < result.length; ++i) {
 								sellerAgents[i] = result[i].getName();
@@ -132,7 +132,7 @@ public class BookBuyerAgent extends Agent {
 				} 
 				cfp.setContent(targetBookTitle);
 				cfp.setConversationId("book-trade");
-				cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
+				cfp.setReplyWith("cfp" + System.currentTimeMillis() + getName() + targetBookTitle); // Unique value
 				myAgent.send(cfp);
 				// Prepare the template to get proposals
 				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("book-trade"),
@@ -169,7 +169,7 @@ public class BookBuyerAgent extends Agent {
 				order.addReceiver(bestSeller);
 				order.setContent(targetBookTitle);
 				order.setConversationId("book-trade");
-				order.setReplyWith("order"+System.currentTimeMillis());
+				order.setReplyWith("order"+System.currentTimeMillis()+getName()+targetBookTitle);
 				myAgent.send(order);
 				// Prepare the template to get the purchase order reply
 				mt = MessageTemplate.and(MessageTemplate.MatchConversationId("book-trade"),
@@ -186,10 +186,10 @@ public class BookBuyerAgent extends Agent {
 						
 						System.out.println(String.format("### %s successfully purchased %s from %s for $ %.2f ###",
 								myAgent.getLocalName(), targetBookTitle, reply.getSender().getLocalName(), bestPrice));
-						// myAgent.doDelete();
 					}
 					else {
-						System.out.println("Attempt failed: requested book, " + targetBookTitle +" already sold.");
+						System.out.println(String.format("!!! Attempt failed: requested book, %s by %s is already sold. !!!",
+								targetBookTitle, myAgent.getLocalName()));
 					}
 
 					step = 4;
@@ -203,7 +203,8 @@ public class BookBuyerAgent extends Agent {
 
 		public boolean done() {
 			if (step == 2 && bestSeller == null) {
-				System.out.println("Attempt failed: "+targetBookTitle+" not available for sale");
+				System.out.println(String.format("!!! Attempt failed: requested book, %s by %s is not avilable. !!!",
+						targetBookTitle, myAgent.getLocalName()));
 			}
 			
 			if((step == 2 && bestSeller == null) || step == 4) {

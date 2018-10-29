@@ -53,7 +53,8 @@ public class Book {
 	
 	public boolean Sell() {
 		if (isAvailableForSell()) {
-			setQuantity(getQuantity() - 1);
+			if(getType() == BookType.HardCopy)
+				setQuantity(getQuantity() - 1);
 			return true;
 		}
 		

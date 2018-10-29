@@ -41,6 +41,8 @@ import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -55,6 +57,9 @@ public class BookSellerAgent extends Agent {
 
 	// Put agent initializations here
 	protected void setup() {
+		// Printout a welcome message
+		System.out.println("Hallo! Seller-agent "+getAID().getName()+" is ready.");
+		
 		initializeCatalog();
 		
 		if(catalogue.size() > 0) {
@@ -142,6 +147,8 @@ public class BookSellerAgent extends Agent {
 				String title = msg.getContent();
 				ACLMessage reply = msg.createReply();
 
+//				System.out.println(String.format("%s got request for %s from %s", 
+//						getLocalName(), title, msg.getSender().getLocalName()));
 				Book book = catalogue.get(title);
 				if (book != null && book.isAvailableForSell()) {
 					// The requested book is available for sale. Reply with the price
@@ -180,10 +187,20 @@ public class BookSellerAgent extends Agent {
 
 				Book book = catalogue.get(title);
 				if (book != null && book.isAvailableForSell()) {
+					book.Sell();
 					reply.setPerformative(ACLMessage.INFORM);
 					// System.out.println(title+" sold to agent "+msg.getSender().getName());
 				}
 				else {
+//					if (book != null) {
+//						System.out.println(String.format("%%%%%%%%%% %s %s %s %%%%%%%%%%", 
+//								book.getTitle(), book.getType(), book.isAvailableForSell()));
+//					}else {
+//						System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^" + title + catalogue.contains(title));
+//						for(String key : Collections.list(catalogue.keys())) {
+//							System.out.println(String.format("%s %s %s %s", key, title, key == title, getLocalName()));
+//						}
+//					}
 					// The requested book has been sold to another buyer in the meanwhile .
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("not-available");
