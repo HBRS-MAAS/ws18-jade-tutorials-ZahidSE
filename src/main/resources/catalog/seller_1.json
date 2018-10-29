@@ -1,26 +1,26 @@
 [
 	{
 		"title":"In Search of Lost Time",
-		"quantity":8,
-		"price":18.0,
+		"quantity":5,
+		"price":20.0,
 		"type":"HardCopy"
 	},
 	{
-		"title":" Don Quixote",
-		"quantity":12,
-		"price":30.0,
+		"title":"Don Quixote",
+		"quantity":15,
+		"price":25.0,
 		"type":"HardCopy"
 	},
 	{
 		"title":"Ulysses",
 		"quantity":-1,
-		"price":15.0,
+		"price":10.0,
 		"type":"SoftCopy"
 	},
 	{
 		"title":"The Great Gatsby",
 		"quantity":-1,
-		"price":14.0,
+		"price":12.0,
 		"type":"SoftCopy"
 	}
 ]

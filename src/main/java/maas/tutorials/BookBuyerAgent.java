@@ -24,20 +24,32 @@ Boston, MA  02111-1307, USA.
 package maas.tutorials;
 
 import jade.core.Agent;
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
+import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.ShutdownPlatform;
 
 public class BookBuyerAgent extends Agent {
 	// The title of the book to buy
 	private String targetBookTitle;
 	// The list of known seller agents
 	private AID[] sellerAgents;
+	
+	private int totalBooksToPurchase;
+	private int booksProcessed;
+	
+	private int totalAgents = 1;
+	private int agentsFinished;
 
 	// Put agent initializations here
 	protected void setup() {
@@ -47,35 +59,38 @@ public class BookBuyerAgent extends Agent {
 		// Get the title of the book to buy as a start-up argument
 		Object[] args = getArguments();
 		if (args != null && args.length > 0) {
-			targetBookTitle = (String) args[0];
-			System.out.println("Target book is "+targetBookTitle);
-
-			// Add a TickerBehaviour that schedules a request to seller agents every minute
-			addBehaviour(new TickerBehaviour(this, 60000) {
-				protected void onTick() {
-					System.out.println("Trying to buy "+targetBookTitle);
-					// Update the list of seller agents
-					DFAgentDescription template = new DFAgentDescription();
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType("book-selling");
-					template.addServices(sd);
-					try {
-						DFAgentDescription[] result = DFService.search(myAgent, template); 
-						System.out.println("Found the following seller agents:");
-						sellerAgents = new AID[result.length];
-						for (int i = 0; i < result.length; ++i) {
-							sellerAgents[i] = result[i].getName();
-							System.out.println(sellerAgents[i].getName());
+			totalBooksToPurchase = args.length;
+			for(Object title : args) {
+				// Add a TickerBehaviour that schedules a request to seller agents every minute
+				addBehaviour(new TickerBehaviour(this, 10000) {
+					protected void onTick() {
+						targetBookTitle = ((String)title).trim();
+						System.out.println("Target book is "+targetBookTitle);
+						
+						System.out.println("Trying to buy "+targetBookTitle);
+						// Update the list of seller agents
+						DFAgentDescription template = new DFAgentDescription();
+						ServiceDescription sd = new ServiceDescription();
+						sd.setType("book-selling");
+						template.addServices(sd);
+						try {
+							DFAgentDescription[] result = DFService.search(myAgent, template); 
+							System.out.println("Found the following seller agents:");
+							sellerAgents = new AID[result.length];
+							for (int i = 0; i < result.length; ++i) {
+								sellerAgents[i] = result[i].getName();
+								System.out.println(sellerAgents[i].getName());
+							}
 						}
+						catch (FIPAException fe) {
+							fe.printStackTrace();
+						}
+	
+						// Perform the request
+						myAgent.addBehaviour(new RequestPerformer(targetBookTitle));
 					}
-					catch (FIPAException fe) {
-						fe.printStackTrace();
-					}
-
-					// Perform the request
-					myAgent.addBehaviour(new RequestPerformer());
-				}
-			} );
+				} );
+			}
 		}
 		else {
 			// Make the agent terminate
@@ -97,10 +112,15 @@ public class BookBuyerAgent extends Agent {
 	 */
 	private class RequestPerformer extends Behaviour {
 		private AID bestSeller; // The agent who provides the best offer 
-		private int bestPrice;  // The best offered price
+		private double bestPrice;  // The best offered price
 		private int repliesCnt = 0; // The counter of replies from seller agents
 		private MessageTemplate mt; // The template to receive replies
 		private int step = 0;
+		private String targetBookTitle;
+		
+		public RequestPerformer(String targetBookTitle){
+			this.targetBookTitle = targetBookTitle;
+		}
 
 		public void action() {
 			switch (step) {
@@ -126,7 +146,7 @@ public class BookBuyerAgent extends Agent {
 					// Reply received
 					if (reply.getPerformative() == ACLMessage.PROPOSE) {
 						// This is an offer 
-						int price = Integer.parseInt(reply.getContent());
+						double price = Double.parseDouble(reply.getContent());
 						if (bestSeller == null || price < bestPrice) {
 							// This is the best offer at present
 							bestPrice = price;
@@ -163,12 +183,11 @@ public class BookBuyerAgent extends Agent {
 					// Purchase order reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						// Purchase successful. We can terminate
-						System.out.println(targetBookTitle+" successfully purchased from agent "+reply.getSender().getName());
-						System.out.println("Price = "+bestPrice);
-						myAgent.doDelete();
+						System.out.println("%%%%%%%" + targetBookTitle+" successfully purchased from agent "+reply.getSender().getLocalName() + " and Price = "+bestPrice);
+						// myAgent.doDelete();
 					}
 					else {
-						System.out.println("Attempt failed: requested book already sold.");
+						System.out.println("Attempt failed: requested book, " + targetBookTitle +" already sold.");
 					}
 
 					step = 4;
@@ -184,7 +203,40 @@ public class BookBuyerAgent extends Agent {
 			if (step == 2 && bestSeller == null) {
 				System.out.println("Attempt failed: "+targetBookTitle+" not available for sale");
 			}
-			return ((step == 2 && bestSeller == null) || step == 4);
+			
+			if((step == 2 && bestSeller == null) || step == 4) {
+				booksProcessed++;
+				System.out.println(String.format("########## Title: %s, Step: %d, Processed:%d", targetBookTitle, step, booksProcessed));
+				
+				if(booksProcessed >= totalBooksToPurchase) {
+					myAgent.doDelete();
+					agentsFinished++;
+					
+					if(agentsFinished == totalAgents) {
+						shutDown();
+					}
+				}
+				return true;
+			}
+			
+			return false;
+		}
+		
+		private void shutDown() {
+			ACLMessage shutdownMessage = new ACLMessage(ACLMessage.REQUEST);
+			Codec codec = new SLCodec();
+			myAgent.getContentManager().registerLanguage(codec);
+			myAgent.getContentManager().registerOntology(JADEManagementOntology.getInstance());
+			shutdownMessage.addReceiver(myAgent.getAMS());
+			shutdownMessage.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+			shutdownMessage.setOntology(JADEManagementOntology.getInstance().getName());
+			try {
+			    myAgent.getContentManager().fillContent(shutdownMessage,new Action(myAgent.getAID(), new ShutdownPlatform()));
+			    myAgent.send(shutdownMessage);
+			}
+			catch (Exception e) {
+				System.out.println("An error occured while shutting down platform");
+			}
 		}
 	}  // End of inner class RequestPerformer
 }

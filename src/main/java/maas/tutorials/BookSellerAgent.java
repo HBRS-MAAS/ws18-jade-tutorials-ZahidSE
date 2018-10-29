@@ -58,8 +58,6 @@ public class BookSellerAgent extends Agent {
 		initializeCatalog();
 		
 		if(catalogue.size() > 0) {
-			System.out.println(String.format("########## %s is not a valid seller id ##########", getLocalName()));
-			
 			// Register the book-selling service in the yellow pages
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName(getAID());
@@ -79,9 +77,9 @@ public class BookSellerAgent extends Agent {
 
 			// Add the behaviour serving purchase orders from buyer agents
 			addBehaviour(new PurchaseOrdersServer());
+		}else {
+			System.out.println(String.format("########## %s is not a valid seller id ##########", getLocalName()));
 		}
-
-		
 	}
 	
 	/**
@@ -95,7 +93,7 @@ public class BookSellerAgent extends Agent {
 	 * Read catalog based on agent local name
 	 */
 	private void initializeCatalog() {
-		String catalogFilePath = String.format("catalog/%s.json", getLocalName());
+		String catalogFilePath = String.format("/catalog/%s.json", getLocalName());
 		InputStream catalogInputStream = this.getClass().getResourceAsStream(catalogFilePath);
 		if ( catalogInputStream != null ) {
 			ObjectMapper mapper = new ObjectMapper();	
@@ -108,7 +106,7 @@ public class BookSellerAgent extends Agent {
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
-		}		
+		}
 	}
 
 	// Put agent clean-up operations here
