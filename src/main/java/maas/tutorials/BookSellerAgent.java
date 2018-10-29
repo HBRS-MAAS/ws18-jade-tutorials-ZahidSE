@@ -181,7 +181,7 @@ public class BookSellerAgent extends Agent {
 				Book book = catalogue.get(title);
 				if (book != null && book.isAvailableForSell()) {
 					reply.setPerformative(ACLMessage.INFORM);
-					System.out.println(title+" sold to agent "+msg.getSender().getName());
+					// System.out.println(title+" sold to agent "+msg.getSender().getName());
 				}
 				else {
 					// The requested book has been sold to another buyer in the meanwhile .

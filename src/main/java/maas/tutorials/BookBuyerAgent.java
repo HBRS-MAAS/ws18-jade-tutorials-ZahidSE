@@ -48,8 +48,8 @@ public class BookBuyerAgent extends Agent {
 	private int totalBooksToPurchase;
 	private int booksProcessed;
 	
-	private int totalAgents = 1;
-	private int agentsFinished;
+	private static int totalAgents = Util.getPurchaseList().length;
+	private static int agentsFinished;
 
 	// Put agent initializations here
 	protected void setup() {
@@ -62,12 +62,12 @@ public class BookBuyerAgent extends Agent {
 			totalBooksToPurchase = args.length;
 			for(Object title : args) {
 				// Add a TickerBehaviour that schedules a request to seller agents every minute
-				addBehaviour(new TickerBehaviour(this, 10000) {
+				addBehaviour(new TickerBehaviour(this, 5000) {
 					protected void onTick() {
 						targetBookTitle = ((String)title).trim();
-						System.out.println("Target book is "+targetBookTitle);
+						// System.out.println("Target book is "+targetBookTitle);
 						
-						System.out.println("Trying to buy "+targetBookTitle);
+						//System.out.println("Trying to buy "+targetBookTitle);
 						// Update the list of seller agents
 						DFAgentDescription template = new DFAgentDescription();
 						ServiceDescription sd = new ServiceDescription();
@@ -75,11 +75,11 @@ public class BookBuyerAgent extends Agent {
 						template.addServices(sd);
 						try {
 							DFAgentDescription[] result = DFService.search(myAgent, template); 
-							System.out.println("Found the following seller agents:");
+							// System.out.println("Found the following seller agents:");
 							sellerAgents = new AID[result.length];
 							for (int i = 0; i < result.length; ++i) {
 								sellerAgents[i] = result[i].getName();
-								System.out.println(sellerAgents[i].getName());
+								// System.out.println(sellerAgents[i].getName());
 							}
 						}
 						catch (FIPAException fe) {
@@ -183,7 +183,9 @@ public class BookBuyerAgent extends Agent {
 					// Purchase order reply received
 					if (reply.getPerformative() == ACLMessage.INFORM) {
 						// Purchase successful. We can terminate
-						System.out.println("%%%%%%%" + targetBookTitle+" successfully purchased from agent "+reply.getSender().getLocalName() + " and Price = "+bestPrice);
+						
+						System.out.println(String.format("### %s successfully purchased %s from %s for $ %.2f ###",
+								myAgent.getLocalName(), targetBookTitle, reply.getSender().getLocalName(), bestPrice));
 						// myAgent.doDelete();
 					}
 					else {
@@ -206,7 +208,7 @@ public class BookBuyerAgent extends Agent {
 			
 			if((step == 2 && bestSeller == null) || step == 4) {
 				booksProcessed++;
-				System.out.println(String.format("########## Title: %s, Step: %d, Processed:%d", targetBookTitle, step, booksProcessed));
+				// System.out.println(String.format("########## Title: %s, Step: %d, Processed:%d", targetBookTitle, step, booksProcessed));
 				
 				if(booksProcessed >= totalBooksToPurchase) {
 					myAgent.doDelete();

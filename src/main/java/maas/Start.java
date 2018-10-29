@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+
 import maas.tutorials.BookBuyerAgent;
+import maas.tutorials.Util;
 
 public class Start {
     public static void main(String[] args) throws IOException {
@@ -17,8 +19,12 @@ public class Start {
     	agents.add("seller_2:maas.tutorials.BookSellerAgent");
     	agents.add("seller_3:maas.tutorials.BookSellerAgent");
     	
-    	agents.add("buyer_1:maas.tutorials.BookBuyerAgent(In Search of Lost Time,The Great Gatsby,Moby Dick)");
-
+    	String[] purchaseList = Util.getPurchaseList();
+    	for(int i=0; i< purchaseList.length; i++) {
+    		String agent = String.format("buyer_%d:maas.tutorials.BookBuyerAgent(%s)", i, purchaseList[i]);
+    		agents.add(agent);
+    	}
+    	
     	List<String> cmd = new Vector<>();
     	cmd.add("-agents");
     	StringBuilder sb = new StringBuilder();
@@ -28,12 +34,5 @@ public class Start {
     	}
     	cmd.add(sb.toString());
         jade.Boot.main(cmd.toArray(new String[cmd.size()]));
-    	
-//    	if(Pattern.matches("\\d+", "895d"))
-//	    {
-//	        System.out.println("It's an integer!");
-//	    }
-    	
-
     }
 }
