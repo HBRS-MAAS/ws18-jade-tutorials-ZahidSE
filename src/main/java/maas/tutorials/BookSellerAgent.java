@@ -192,15 +192,6 @@ public class BookSellerAgent extends Agent {
 					// System.out.println(title+" sold to agent "+msg.getSender().getName());
 				}
 				else {
-//					if (book != null) {
-//						System.out.println(String.format("%%%%%%%%%% %s %s %s %%%%%%%%%%", 
-//								book.getTitle(), book.getType(), book.isAvailableForSell()));
-//					}else {
-//						System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^" + title + catalogue.contains(title));
-//						for(String key : Collections.list(catalogue.keys())) {
-//							System.out.println(String.format("%s %s %s %s", key, title, key == title, getLocalName()));
-//						}
-//					}
 					// The requested book has been sold to another buyer in the meanwhile .
 					reply.setPerformative(ACLMessage.FAILURE);
 					reply.setContent("not-available");
